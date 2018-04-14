@@ -41,6 +41,7 @@ window.App = {
       account = accounts[0]; // Change index to select MetaMask wallet account
 
       self.refreshBalance();
+      self.refreshSupply();
     });
   },
 
@@ -62,6 +63,22 @@ window.App = {
     }).catch(function(e) {
       console.log(e);
       self.setStatus("Error getting balance; see log.");
+    });
+  },
+
+  refreshSupply: function() {
+    var self = this;
+
+    var char;
+    Charcoal.deployed().then(function(instance) {
+      char = instance;
+      return char.totalSupply.call(account, {from: account});
+    }).then(function(value) {
+      var supply_element = document.getElementById("supply");
+      supply_element.innerHTML = value.valueOf();
+      console.log(value);
+    }).catch(function(e) {
+      console.log(e);
     });
   },
 
