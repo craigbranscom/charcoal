@@ -29,6 +29,7 @@ contract Charcoal {
     /// @notice Charcoal Constructor
     function Charcoal() public {
         totalSupply = 12011;
+        balanceOf[this] = 12011;
     }
     
     /// @notice 

@@ -38,7 +38,7 @@ window.App = {
       }
 
       accounts = accs;
-      account = accounts[0];
+      account = accounts[0]; // Change index to select MetaMask wallet account
 
       self.refreshBalance();
     });
@@ -55,7 +55,7 @@ window.App = {
     var char;
     Charcoal.deployed().then(function(instance) {
       char = instance;
-      return char.getBalance.call(account, {from: account});
+      return char.balanceOf.call(account, {from: account});
     }).then(function(value) {
       var balance_element = document.getElementById("balance");
       balance_element.innerHTML = value.valueOf();
