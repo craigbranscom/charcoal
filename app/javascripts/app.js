@@ -18,7 +18,6 @@ var accounts;
 var account;
 
 window.App = {
-  // Initialization
   start: function() {
     var self = this;
 
@@ -33,7 +32,7 @@ window.App = {
       }
 
       if (accs.length == 0) {
-        alert("Couldn't get any accounts! Make sure your Ethereum client is configured correctly.");
+        alert("Could not find any accounts! Make sure your Ethereum client is configured correctly.");
         return;
       }
 
@@ -53,16 +52,21 @@ window.App = {
   refreshBalance: function() {
     var self = this;
 
+    self.setStatus("Refreshing balance...");
+    
     var char;
     Charcoal.deployed().then(function(instance) {
       char = instance;
+      console.log("Refreshing balance of account " + account);
       return char.balanceOf.call(account, {from: account});
     }).then(function(value) {
       var balance_element = document.getElementById("balance");
       balance_element.innerHTML = value.valueOf();
+      console.log("Refreshed balance: " + value);
+      self.setStatus("Refreshed balance");
     }).catch(function(e) {
       console.log(e);
-      self.setStatus("Error getting balance; see log.");
+      self.setStatus("Error getting balance, refer to log for details");
     });
   },
 
@@ -82,24 +86,24 @@ window.App = {
     });
   },
 
-  sendCoin: function() {
+  transfer: function() {
     var self = this;
 
     var amount = parseInt(document.getElementById("amount").value);
-    var receiver = document.getElementById("receiver").value;
+    var recipient = document.getElementById("recipient").value;
 
     this.setStatus("Initiating transaction... please wait");
 
     var char;
     Charcoal.deployed().then(function(instance) {
       char = instance;
-      return char.sendCoin(receiver, amount, {from: account});
+      return char.transfer(recipient, amount, {from: account});
     }).then(function() {
       self.setStatus("Transaction complete");
       self.refreshBalance();
     }).catch(function(e) {
       console.log(e);
-      self.setStatus("Error sending coin; see log.");
+      self.setStatus("Error sending token, refer to console log for details");
     });
   }
 };

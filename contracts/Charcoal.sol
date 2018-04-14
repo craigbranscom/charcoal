@@ -29,7 +29,8 @@ contract Charcoal {
     /// @notice Charcoal Constructor
     function Charcoal() public {
         totalSupply = 12011;
-        balanceOf[this] = 12011;
+        balanceOf[this] = 100; // Give contract 100 Charcoal
+        balanceOf[tx.origin] = 5; // Give publishing account x Charcoal
     }
     
     /// @notice 
