@@ -8,9 +8,11 @@ pragma solidity ^0.4.17;
 contract Charcoal {
     
     /// @notice Final variables
-    string public constant name = "Charcoal";
-    string public constant symbol = "CHAR";
-    uint8 public constant decimals = 18;
+    string public name;
+    string public symbol;
+    uint8 public decimals;
+    address public contractAddress;
+    address public owner;
     
     /// @notice State variables
     uint256 public totalSupply;
@@ -25,18 +27,20 @@ contract Charcoal {
     event Transfer(address indexed _from, address indexed _to, uint256 _value);
     event Approval(address indexed _owner, address indexed _spender, uint256 _value);
     event Burn(address indexed from, uint256 value);
+    event Mint(address indexed from, uint256 value);
     
     /// @notice Charcoal Constructor
+    /// @dev 
     function Charcoal() public {
+        name = "Charcoal";
+        symbol = "CHAR";
+        decimals = 0; // Testing changes to this for MetaMask Decimal issue
+        contractAddress = this;
+        owner = msg.sender;
+
         totalSupply = 12011;
-        balanceOf[this] = 100; // Give contract 100 Charcoal
-        balanceOf[tx.origin] = 5; // Give publishing account x Charcoal
-    }
-    
-    /// @notice 
-    /// @return uint256
-    function totalSupply() external view returns (uint256) {
-        return totalSupply;
+        balanceOf[this] = 12000; // Give contract 12000 Charcoal
+        balanceOf[msg.sender] = 11; // Give publishing account 11 Charcoal
     }
     
     /// @notice
@@ -59,6 +63,21 @@ contract Charcoal {
         return false;
     }
     
+    /// @notice
+    /// @param uint256 _amount
+    /// @return bool
+    function increaseSupply(uint256 _amount) public returns (bool) {
+        totalSupply += _amount;
+        return true;
+    }
+
+    /// @notice
+    /// @param uint256 _amount
+    /// @return bool
+    function decreaseSupply(uint256 _amount) public returns (bool) {
+        totalSupply -= _amount;
+        return true;
+    }
     
     /// @notice
     /// @param address _from, address _to, uint _value

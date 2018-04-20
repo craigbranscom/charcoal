@@ -8,7 +8,7 @@ import { default as contract } from 'truffle-contract'
 // Import our contract artifacts and turn them into usable abstractions.
 import charcoal_artifacts from '../../build/contracts/Charcoal.json'
 
-// MetaCoin is our usable abstraction, which we'll use through the code below.
+// Charcoal is our usable abstraction, which we'll use through the code below.
 var Charcoal = contract(charcoal_artifacts);
 
 // The following code is simple to show off interacting with your contracts.
@@ -16,6 +16,7 @@ var Charcoal = contract(charcoal_artifacts);
 // For application bootstrapping, check out window.addEventListener below.
 var accounts;
 var account;
+var contractAddress;
 
 window.App = {
   start: function() {
@@ -39,6 +40,7 @@ window.App = {
       accounts = accs;
       account = accounts[0]; // Change index to select MetaMask wallet account
 
+      self.getContractAddress();
       self.refreshBalance();
       self.refreshSupply();
     });
@@ -86,13 +88,55 @@ window.App = {
     });
   },
 
+  getContractAddress: function() {
+    var self = this;
+
+    self.setStatus("Retrieving Charcoal contract address... please wait");
+
+    var char;
+    Charcoal.deployed().then(function(instance) {
+      char = instance;
+      return char.contractAddress.call({from: account});
+    }).then(function(address) {
+      console.log("Contract address retrieved: " + address);
+      contractAddress = address;
+      self.setStatus("Charcoal contract retrieval successful");
+    }).catch(function(e) {
+      console.log(e);
+      self.setStatus("Error retrieving Charcoal contract address, refer to console log for details");
+    });
+  },
+
+  payContract: function(amount) {
+    var self = this;
+    var address = contractAddress;
+
+    self.setStatus("Initiating payment to contract... please wait");
+
+    var char;
+    Charcoal.deployed().then(function(instance) {
+      char = instance;
+
+      console.log("amount: " + amount);
+      console.log("address: " + address);
+
+      return char.transfer(address, amount, {from: account});
+    }).then(function(result) {
+      self.setStatus("Payment successful");
+      self.refreshBalance();
+    }).catch(function(e) {
+      console.log(e);
+      self.setStatus("Error completing payment, refer to console log for details");
+    });
+  },
+
   transfer: function() {
     var self = this;
 
     var amount = parseInt(document.getElementById("amount").value);
     var recipient = document.getElementById("recipient").value;
 
-    this.setStatus("Initiating transaction... please wait");
+    self.setStatus("Initiating transaction... please wait");
 
     var char;
     Charcoal.deployed().then(function(instance) {
