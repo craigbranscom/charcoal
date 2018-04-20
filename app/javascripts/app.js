@@ -8,7 +8,7 @@ import { default as contract } from 'truffle-contract'
 // Import our contract artifacts and turn them into usable abstractions.
 import charcoal_artifacts from '../../build/contracts/Charcoal.json'
 
-// MetaCoin is our usable abstraction, which we'll use through the code below.
+// Charcoal is our usable abstraction, which we'll use through the code below.
 var Charcoal = contract(charcoal_artifacts);
 
 // The following code is simple to show off interacting with your contracts.
@@ -16,9 +16,9 @@ var Charcoal = contract(charcoal_artifacts);
 // For application bootstrapping, check out window.addEventListener below.
 var accounts;
 var account;
+var contractAddress;
 
 window.App = {
-  // Initialization
   start: function() {
     var self = this;
 
@@ -33,14 +33,16 @@ window.App = {
       }
 
       if (accs.length == 0) {
-        alert("Couldn't get any accounts! Make sure your Ethereum client is configured correctly.");
+        alert("Could not find any accounts! Make sure your Ethereum client is configured correctly.");
         return;
       }
 
       accounts = accs;
-      account = accounts[0];
+      account = accounts[0]; // Change index to select MetaMask wallet account
 
+      self.getContractAddress();
       self.refreshBalance();
+      self.refreshSupply();
     });
   },
 
@@ -52,37 +54,100 @@ window.App = {
   refreshBalance: function() {
     var self = this;
 
+    self.setStatus("Refreshing balance...");
+    
     var char;
     Charcoal.deployed().then(function(instance) {
       char = instance;
-      return char.getBalance.call(account, {from: account});
+      console.log("Refreshing balance of account " + account);
+      return char.balanceOf.call(account, {from: account});
     }).then(function(value) {
       var balance_element = document.getElementById("balance");
       balance_element.innerHTML = value.valueOf();
+      console.log("Refreshed balance: " + value);
+      self.setStatus("Refreshed balance");
     }).catch(function(e) {
       console.log(e);
-      self.setStatus("Error getting balance; see log.");
+      self.setStatus("Error getting balance, refer to log for details");
     });
   },
 
-  sendCoin: function() {
+  refreshSupply: function() {
     var self = this;
-
-    var amount = parseInt(document.getElementById("amount").value);
-    var receiver = document.getElementById("receiver").value;
-
-    this.setStatus("Initiating transaction... please wait");
 
     var char;
     Charcoal.deployed().then(function(instance) {
       char = instance;
-      return char.sendCoin(receiver, amount, {from: account});
+      return char.totalSupply.call(account, {from: account});
+    }).then(function(value) {
+      var supply_element = document.getElementById("supply");
+      supply_element.innerHTML = value.valueOf();
+      console.log(value);
+    }).catch(function(e) {
+      console.log(e);
+    });
+  },
+
+  getContractAddress: function() {
+    var self = this;
+
+    self.setStatus("Retrieving Charcoal contract address... please wait");
+
+    var char;
+    Charcoal.deployed().then(function(instance) {
+      char = instance;
+      return char.contractAddress.call({from: account});
+    }).then(function(address) {
+      console.log("Contract address retrieved: " + address);
+      contractAddress = address;
+      self.setStatus("Charcoal contract retrieval successful");
+    }).catch(function(e) {
+      console.log(e);
+      self.setStatus("Error retrieving Charcoal contract address, refer to console log for details");
+    });
+  },
+
+  payContract: function(amount) {
+    var self = this;
+    var address = contractAddress;
+
+    self.setStatus("Initiating payment to contract... please wait");
+
+    var char;
+    Charcoal.deployed().then(function(instance) {
+      char = instance;
+
+      console.log("amount: " + amount);
+      console.log("address: " + address);
+
+      return char.transfer(address, amount, {from: account});
+    }).then(function(result) {
+      self.setStatus("Payment successful");
+      self.refreshBalance();
+    }).catch(function(e) {
+      console.log(e);
+      self.setStatus("Error completing payment, refer to console log for details");
+    });
+  },
+
+  transfer: function() {
+    var self = this;
+
+    var amount = parseInt(document.getElementById("amount").value);
+    var recipient = document.getElementById("recipient").value;
+
+    self.setStatus("Initiating transaction... please wait");
+
+    var char;
+    Charcoal.deployed().then(function(instance) {
+      char = instance;
+      return char.transfer(recipient, amount, {from: account});
     }).then(function() {
       self.setStatus("Transaction complete");
       self.refreshBalance();
     }).catch(function(e) {
       console.log(e);
-      self.setStatus("Error sending coin; see log.");
+      self.setStatus("Error sending token, refer to console log for details");
     });
   }
 };
