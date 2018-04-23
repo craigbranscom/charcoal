@@ -41,6 +41,7 @@ window.App = {
       account = accounts[0]; // Change index to select MetaMask wallet account
 
       self.getContractAddress();
+
       self.refreshBalance();
       self.refreshSupply();
     });
@@ -59,16 +60,32 @@ window.App = {
     var char;
     Charcoal.deployed().then(function(instance) {
       char = instance;
-      console.log("Refreshing balance of account " + account);
       return char.balanceOf.call(account, {from: account});
     }).then(function(value) {
       var balance_element = document.getElementById("balance");
       balance_element.innerHTML = value.valueOf();
-      console.log("Refreshed balance: " + value);
       self.setStatus("Refreshed balance");
     }).catch(function(e) {
       console.log(e);
       self.setStatus("Error getting balance, refer to log for details");
+    });
+  },
+
+  refreshContractBalance: function() {
+    var self = this;
+
+    var char;
+    Charcoal.deployed().then(function(instance) {
+      char = instance;
+      return char.balanceOf.call(contractAddress, {from: account});
+    }).then(function(value) {
+      var contract_balance_element = document.getElementById("contract-balance");
+      contract_balance_element.innerHTML = value.valueOf();
+      console.log(e);
+      self.setStatus("Refreshed contract balance");
+    }).catch(function(e) {
+      console.log(e);
+      self.setStatus("Error refreshing contract balance, refer to log for details");
     });
   },
 
@@ -82,7 +99,6 @@ window.App = {
     }).then(function(value) {
       var supply_element = document.getElementById("supply");
       supply_element.innerHTML = value.valueOf();
-      console.log(value);
     }).catch(function(e) {
       console.log(e);
     });
@@ -98,9 +114,9 @@ window.App = {
       char = instance;
       return char.contractAddress.call({from: account});
     }).then(function(address) {
-      console.log("Contract address retrieved: " + address);
       contractAddress = address;
       self.setStatus("Charcoal contract retrieval successful");
+      self.refreshContractBalance();
     }).catch(function(e) {
       console.log(e);
       self.setStatus("Error retrieving Charcoal contract address, refer to console log for details");
@@ -116,10 +132,6 @@ window.App = {
     var char;
     Charcoal.deployed().then(function(instance) {
       char = instance;
-
-      console.log("amount: " + amount);
-      console.log("address: " + address);
-
       return char.transfer(address, amount, {from: account});
     }).then(function(result) {
       self.setStatus("Payment successful");
