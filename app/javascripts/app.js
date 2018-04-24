@@ -17,6 +17,7 @@ var Charcoal = contract(charcoal_artifacts);
 var accounts;
 var account;
 var contractAddress;
+var payouts = [];
 
 window.App = {
   start: function() {
@@ -39,6 +40,7 @@ window.App = {
 
       accounts = accs;
       account = accounts[0]; // Change index to select MetaMask wallet account
+      payouts[account] = 0;
 
       self.getContractAddress();
 
@@ -87,6 +89,21 @@ window.App = {
       console.log(e);
       self.setStatus("Error refreshing contract balance, refer to log for details");
     });
+  },
+
+  logActivity: function (amount) {
+    var self = this;
+
+    payouts[account] += amount;
+    console.log("Address " + account + " credited with " + amount + " CHAR");
+    console.log("Total: " + payouts[account])
+
+    /// @notice Checks payouts balance against payment threshold
+    if (payouts[account] >= 10) {
+      console.log("PAID " + payouts[account] + " to " + account);
+
+      payouts[account] = 0;
+    }
   },
 
   refreshSupply: function() {
