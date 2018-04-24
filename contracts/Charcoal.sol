@@ -31,7 +31,7 @@ contract Charcoal {
     
     // @notice Constructor
     // @dev 
-    function Charcoal() public {
+    constructor() public {
         name = "Charcoal";
         symbol = "CHAR";
         decimals = 0; // Testing changes to this for MetaMask Decimal issue
@@ -46,7 +46,7 @@ contract Charcoal {
     // @notice Returns balance of Charcoal at given index
     // @param address _owner Address of owner's balance
     // @return uint256 Balance of Charcoal
-    function balanceOf(address _owner) external view returns (uint256) {
+    function balanceOf(address _owner) external view returns (uint256 balance) {
         return balanceOf[_owner];
     }
     
@@ -55,7 +55,7 @@ contract Charcoal {
     // @dev Transferring account param is passed implicitly
     // @param address _to, uint _value
     // @return bool True for success, or False for failure
-    function transfer(address _to, uint _value) public returns (bool) {
+    function transfer(address _to, uint _value) public returns (bool success) {
         if (_value > 0 && _value <= balanceOf[msg.sender]) {
             balanceOf[msg.sender] -= _value;
             balanceOf[_to] += _value;
@@ -68,7 +68,7 @@ contract Charcoal {
     // @dev Consider renaming to Mint()
     // @param uint256 _amount Amount added to total supply
     // @return bool True for success, or False for failure
-    function increaseSupply(uint256 _amount) public returns (bool) {
+    function increaseSupply(uint256 _amount) public returns (bool success) {
         totalSupply += _amount;
         return true;
     }
@@ -77,7 +77,7 @@ contract Charcoal {
     // @dev Consider renaming to Burn()
     // @param uint256 _amount Amount removed from total supply
     // @return bool True for success, or False for failure
-    function decreaseSupply(uint256 _amount) public returns (bool) {
+    function decreaseSupply(uint256 _amount) public returns (bool success) {
         totalSupply -= _amount;
         return true;
     }
@@ -88,7 +88,7 @@ contract Charcoal {
     // @param address _to Address to transfer to
     // @param uint _value Value to transfer
     // @return bool True for success, or False for failure
-    function transferFrom(address _from, address _to, uint _value) public returns (bool) {
+    function transferFrom(address _from, address _to, uint _value) public returns (bool success) {
         if (allowance[_from][msg.sender] > 0 &&
             _value > 0 &&
             allowance[_from][msg.sender] >= _value && 
@@ -106,7 +106,7 @@ contract Charcoal {
     // @param address _spender Address of spending party
     // @param uint _value Value to approve for spending
     // @return bool success True for success, or False for failure
-    function approve(address _spender, uint _value) public returns (bool) {
+    function approve(address _spender, uint _value) public returns (bool success) {
         allowance[msg.sender][_spender] = _value;
         return true;
     }
@@ -115,7 +115,7 @@ contract Charcoal {
     // @param address _owner Address of Charcoal owner
     // @param address _spender Address of Charcoal spender
     // @return uint Value of allowance
-    function allowance(address _owner, address _spender) public constant returns (uint) {
+    function allowance(address _owner, address _spender) public constant returns (uint value) {
         return allowance[_owner][_spender];
     }
 }
